@@ -2,31 +2,48 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 const (
 	usdToEurRate = 0.89936034
 	usdToRubRate = 90.999385
-	usdAbbr      = "USD"
-	eurAbbr      = "EUR"
-	rubAbbr      = "RUB"
 )
 
+type ratesMap = map[string]map[string]float64
+type currMap = map[string]float64
+
 func main() {
-	sourceCurrency := getSourceCurrency()
+	rates := initRatesMap()
+	sourceCurrency := getSourceCurrency(rates)
 	amount := getExchangeAmount()
-	targetCurrency := getTargetCurrency(sourceCurrency)
-	exchangeResult := getExchangeResult(sourceCurrency, amount, targetCurrency)
-	fmt.Printf("Вы получите %.2f %s\n", exchangeResult, targetCurrency)
+	target, rate := getTargetCurrencyAndRate(sourceCurrency)
+	exchangeResult := getExchangeResult(rate, amount)
+	fmt.Printf("Вы получите %.2f %s\n", exchangeResult, target)
 }
 
-func getSourceCurrency() string {
-	var cur string
-	for cur != usdAbbr && cur != eurAbbr && cur != rubAbbr {
-		fmt.Printf("Введите исходную валюту (%s, %s или %s): ", usdAbbr, eurAbbr, rubAbbr)
-		fmt.Scan(&cur)
+func initRatesMap() ratesMap {
+	usdMap := currMap{"EUR": usdToEurRate, "RUB": usdToRubRate}
+	eurMap := currMap{"USD": 1.0 / usdToEurRate, "RUB": (1.0 / usdToEurRate) * usdToRubRate}
+	rubMap := currMap{"USD": 1.0 / usdToRubRate, "EUR": (1.0 / usdToRubRate) * usdToEurRate}
+	resultMap := ratesMap{"USD": usdMap, "EUR": eurMap, "RUB": rubMap}
+	return resultMap
+}
+
+func getSourceCurrency(rates ratesMap) currMap {
+	var source string
+	promptCurr := []string{}
+	for k := range rates {
+		promptCurr = append(promptCurr, k)
 	}
-	return cur
+	for {
+		fmt.Printf("Введите исходную валюту (%s): ", strings.Join(promptCurr, ","))
+		fmt.Scan(&source)
+		m, ok := rates[source]
+		if ok {
+			return m
+		}
+	}
 }
 
 func getExchangeAmount() float64 {
@@ -46,69 +63,22 @@ func getExchangeAmount() float64 {
 	}
 }
 
-func getTargetCurrency(sourceCur string) string {
-	var cur string
-	restCur1, restCur2 := getRestCurr(sourceCur)
-	for cur != restCur1 && cur != restCur2 {
-		fmt.Printf("Введите целевую валюту (%s или %s): ", restCur1, restCur2)
-		fmt.Scan(&cur)
+func getTargetCurrencyAndRate(sourceCur currMap) (string, float64) {
+	var target string
+	promptCurr := []string{}
+	for k := range sourceCur {
+		promptCurr = append(promptCurr, k)
 	}
-	return cur
-}
-
-func getRestCurr(sourceCur string) (string, string) {
-	switch sourceCur {
-	case usdAbbr:
-		return eurAbbr, rubAbbr
-	case eurAbbr:
-		return usdAbbr, rubAbbr
-	default:
-		return eurAbbr, usdAbbr
-	}
-}
-
-func getExchangeResult(sourceCur string, amount float64, targetCur string) float64 {
-	switch sourceCur {
-	case usdAbbr:
-		if targetCur == eurAbbr {
-			return calcUsdToEur(amount)
-		} else {
-			return calcUsdToRub(amount)
-		}
-	case eurAbbr:
-		if targetCur == usdAbbr {
-			return calcEurToUsd(amount)
-		} else {
-			return calcEurToRub(amount)
-		}
-	default:
-		if targetCur == usdAbbr {
-			return calcRubToUsd(amount)
-		} else {
-			return calcRubToEur(amount)
+	for {
+		fmt.Printf("Введите целевую валюту (%s): ", strings.Join(promptCurr, ","))
+		fmt.Scan(&target)
+		m, ok := sourceCur[target]
+		if ok {
+			return target, m
 		}
 	}
 }
 
-func calcUsdToEur(amount float64) float64 {
-	return usdToEurRate * amount
-}
-
-func calcUsdToRub(amount float64) float64 {
-	return usdToRubRate * amount
-}
-
-func calcEurToUsd(amount float64) float64 {
-	return amount / usdToEurRate
-}
-
-func calcEurToRub(amount float64) float64 {
-	return (1.0 / usdToEurRate) * usdToRubRate * amount
-}
-
-func calcRubToUsd(amount float64) float64 {
-	return amount / usdToRubRate
-}
-func calcRubToEur(amount float64) float64 {
-	return (1.0 / usdToRubRate) * usdToEurRate * amount
+func getExchangeResult(rate float64, amount float64) float64 {
+	return rate * amount
 }
