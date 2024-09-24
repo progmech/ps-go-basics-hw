@@ -22,26 +22,26 @@ func main() {
 	fmt.Printf("Вы получите %.2f %s\n", exchangeResult, target)
 }
 
-func initRatesMap() ratesMap {
+func initRatesMap() *ratesMap {
 	usdMap := currMap{"EUR": usdToEurRate, "RUB": usdToRubRate}
 	eurMap := currMap{"USD": 1.0 / usdToEurRate, "RUB": (1.0 / usdToEurRate) * usdToRubRate}
 	rubMap := currMap{"USD": 1.0 / usdToRubRate, "EUR": (1.0 / usdToRubRate) * usdToEurRate}
 	resultMap := ratesMap{"USD": usdMap, "EUR": eurMap, "RUB": rubMap}
-	return resultMap
+	return &resultMap
 }
 
-func getSourceCurrency(rates ratesMap) currMap {
+func getSourceCurrency(rates *ratesMap) *currMap {
 	var source string
 	promptCurr := []string{}
-	for k := range rates {
+	for k := range *rates {
 		promptCurr = append(promptCurr, k)
 	}
 	for {
 		fmt.Printf("Введите исходную валюту (%s): ", strings.Join(promptCurr, ","))
 		fmt.Scan(&source)
-		m, ok := rates[source]
+		m, ok := (*rates)[source]
 		if ok {
-			return m
+			return &m
 		}
 	}
 }
@@ -63,16 +63,16 @@ func getExchangeAmount() float64 {
 	}
 }
 
-func getTargetCurrencyAndRate(sourceCur currMap) (string, float64) {
+func getTargetCurrencyAndRate(sourceCur *currMap) (string, float64) {
 	var target string
 	promptCurr := []string{}
-	for k := range sourceCur {
+	for k := range *sourceCur {
 		promptCurr = append(promptCurr, k)
 	}
 	for {
 		fmt.Printf("Введите целевую валюту (%s): ", strings.Join(promptCurr, ","))
 		fmt.Scan(&target)
-		m, ok := sourceCur[target]
+		m, ok := (*sourceCur)[target]
 		if ok {
 			return target, m
 		}
