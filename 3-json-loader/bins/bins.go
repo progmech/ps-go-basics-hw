@@ -1,6 +1,8 @@
 package bins
 
-import "time"
+import (
+	"time"
+)
 
 type Bin struct {
 	Id        string    `json:"id"`
@@ -8,8 +10,6 @@ type Bin struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Name      string    `json:"name"`
 }
-
-type BinList []Bin
 
 func NewBin(id string, private bool, name string) *Bin {
 	res := &Bin{
@@ -20,3 +20,5 @@ func NewBin(id string, private bool, name string) *Bin {
 	}
 	return res
 }
+
+type BinList []Bin

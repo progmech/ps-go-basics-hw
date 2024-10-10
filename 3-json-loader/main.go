@@ -6,9 +6,12 @@ import (
 )
 
 func main() {
-	var binList bins.BinList = bins.BinList{}
-	bin := bins.NewBin("a", true, "Test1")
-	binList = append(binList, *bin)
-	storage.SaveBins(&binList)
-	storage.PrintBins(&binList)
+	binList := bins.BinList{
+		*bins.NewBin("a", true, "Test1"),
+		*bins.NewBin("b", true, "Test2"),
+		*bins.NewBin("c", true, "Test3"),
+	}
+	storage := storage.NewFileStorage("storage.json", &binList)
+	storage.Write()
+	storage.Read()
 }
