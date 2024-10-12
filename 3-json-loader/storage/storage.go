@@ -7,10 +7,9 @@ import (
 	"json-loader/file"
 )
 
-type Storage interface {
+type Storager interface {
 	Read()
 	Write()
-	bins.BinList
 }
 
 type FileStorage struct {

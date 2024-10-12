@@ -1,6 +1,7 @@
 package main
 
 import (
+	"json-loader/api"
 	"json-loader/bins"
 	"json-loader/storage"
 )
@@ -11,7 +12,9 @@ func main() {
 		*bins.NewBin("b", true, "Test2"),
 		*bins.NewBin("c", true, "Test3"),
 	}
-	storage := storage.NewFileStorage("storage.json", &binList)
-	storage.Write()
-	storage.Read()
+	var store storage.Storager = storage.NewFileStorage("storage.json", &binList)
+	store.Write()
+	store.Read()
+
+	api.ReadKey()
 }
