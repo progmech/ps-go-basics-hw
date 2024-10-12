@@ -14,22 +14,20 @@ const (
 	sep   = ","
 )
 
+var ops = map[string]func(...float64) float64{
+	opAvg: getAvg,
+	opSum: getSum,
+	opMed: getMed,
+}
+
 func main() {
 	oper := getOperation()
 	numbers := getNumbers()
-	var result float64
-	switch oper {
-	case opAvg:
-		result = getAvg(numbers)
-	case opSum:
-		result = getSum(numbers)
-	case opMed:
-		result = getMed(numbers)
-	}
+	result := ops[oper](numbers...)
 	fmt.Printf("Результат операции %s: %f\n", oper, result)
 }
 
-func getAvg(numbers []float64) float64 {
+func getAvg(numbers ...float64) float64 {
 	sum := 0.0
 	for _, val := range numbers {
 		sum = sum + val
@@ -37,7 +35,7 @@ func getAvg(numbers []float64) float64 {
 	return sum / float64(len(numbers))
 }
 
-func getSum(numbers []float64) float64 {
+func getSum(numbers ...float64) float64 {
 	sum := 0.0
 	for _, val := range numbers {
 		sum = sum + val
@@ -45,7 +43,7 @@ func getSum(numbers []float64) float64 {
 	return sum
 }
 
-func getMed(numbers []float64) float64 {
+func getMed(numbers ...float64) float64 {
 	slices.Sort(numbers)
 	lens := len(numbers)
 	midIdx := lens / 2
